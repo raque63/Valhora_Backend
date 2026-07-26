@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: valhora-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5433/valhora
+    username: valhora
+    password: valhora
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+app:
+  cors:
+    allowed-origins: http://localhost:5173
+  security:
+    secure-cookies: false
+  jwt:
+    secret: ${JWT_SECRET:CHANGE_THIS_SECRET_IN_YOUR_LOCAL_ENV_FILE_TO_A_LONG_RANDOM_VALUE}
+    access-token-expiration-ms: 900000
+    refresh-token-expiration-ms: 604800000
+  seed:
+    enabled: true
+    admin-email: ${SEED_ADMIN_EMAIL:admin@valhora.com}
+    admin-password: ${SEED_ADMIN_PASSWORD:AdminValhora123}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+  api-key: ${CLOUDINARY_API_KEY:}
+  api-secret: ${CLOUDINARY_API_SECRET:}

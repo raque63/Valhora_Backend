@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: valhora-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: valhora
+      POSTGRES_USER: valhora
+      POSTGRES_PASSWORD: valhora
+    ports:
+      - "5433:5432"
+    volumes:
+      - valhora_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  valhora_postgres_data:
