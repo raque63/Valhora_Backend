@@ -1,5 +1,6 @@
 package com.valhora.backend.products.dto;
 
+import com.valhora.backend.products.Availability;
 import com.valhora.backend.products.Gender;
 import com.valhora.backend.products.Movement;
 import jakarta.validation.constraints.NotBlank;
@@ -44,6 +45,9 @@ public record ProductRequest(
 
         @PositiveOrZero(message = "El stock no puede ser negativo")
         int stock,
+
+        @NotNull(message = "La disponibilidad es obligatoria")
+        Availability availability,
 
         boolean isNew,
 

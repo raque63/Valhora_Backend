@@ -2,6 +2,7 @@ package com.valhora.backend.products.dto;
 
 import com.valhora.backend.categories.dto.BrandResponse;
 import com.valhora.backend.categories.dto.CategoryResponse;
+import com.valhora.backend.products.Availability;
 import com.valhora.backend.products.Gender;
 import com.valhora.backend.products.Movement;
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ public record ProductResponse(
         String strapMaterial,
         String color,
         int stock,
+        Availability availability,
         boolean isNew,
         boolean isBestSeller,
         List<String> imageUrls,

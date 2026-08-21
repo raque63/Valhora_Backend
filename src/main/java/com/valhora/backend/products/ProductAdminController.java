@@ -60,4 +60,9 @@ public class ProductAdminController {
     public ProductResponse addImage(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
         return productService.addImage(id, file);
     }
+
+    @DeleteMapping("/{id}/images")
+    public ProductResponse removeImage(@PathVariable UUID id, @RequestParam String url) {
+        return productService.removeImage(id, url);
+    }
 }

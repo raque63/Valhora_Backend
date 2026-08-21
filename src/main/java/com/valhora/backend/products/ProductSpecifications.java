@@ -50,4 +50,8 @@ final class ProductSpecifications {
     static Specification<Product> priceLessThanOrEqual(BigDecimal max) {
         return (root, query, cb) -> max == null ? null : cb.lessThanOrEqualTo(root.get("price"), max);
     }
+
+    static Specification<Product> hasAvailability(Availability availability) {
+        return (root, query, cb) -> availability == null ? null : cb.equal(root.get("availability"), availability);
+    }
 }

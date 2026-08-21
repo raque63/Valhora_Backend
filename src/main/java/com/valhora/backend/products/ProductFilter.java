@@ -12,6 +12,7 @@ public record ProductFilter(
         String strapMaterial,
         String color,
         BigDecimal minPrice,
-        BigDecimal maxPrice
+        BigDecimal maxPrice,
+        Availability availability
 ) {
 }

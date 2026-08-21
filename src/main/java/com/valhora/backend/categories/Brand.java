@@ -31,4 +31,7 @@ public class Brand {
 
     @Column(nullable = false, unique = true)
     private String slug;
+
+    @Column(name = "logo_url")
+    private String logoUrl;
 }

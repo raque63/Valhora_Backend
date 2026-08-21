@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class CloudinaryService {
 
     private static final String PRODUCTS_FOLDER = "valhora/products";
+    private static final String BRANDS_FOLDER = "valhora/brands";
 
     private final Cloudinary cloudinary;
 
@@ -20,12 +21,20 @@ public class CloudinaryService {
     }
 
     public String upload(MultipartFile file) {
+        return upload(file, PRODUCTS_FOLDER);
+    }
+
+    public String uploadBrandLogo(MultipartFile file) {
+        return upload(file, BRANDS_FOLDER);
+    }
+
+    private String upload(MultipartFile file, String folder) {
         try {
             Map<?, ?> result = cloudinary.uploader().upload(
                     file.getBytes(),
-                    ObjectUtils.asMap("folder", PRODUCTS_FOLDER));
+                    ObjectUtils.asMap("folder", folder));
             return (String) result.get("secure_url");
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             throw new ImageUploadException("No se pudo subir la imagen a Cloudinary", e);
         }
     }

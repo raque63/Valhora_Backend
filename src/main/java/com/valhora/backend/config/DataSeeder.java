@@ -5,6 +5,7 @@ import com.valhora.backend.categories.BrandRepository;
 import com.valhora.backend.categories.Category;
 import com.valhora.backend.categories.CategoryRepository;
 import com.valhora.backend.common.util.Slugs;
+import com.valhora.backend.products.Availability;
 import com.valhora.backend.products.Gender;
 import com.valhora.backend.products.Movement;
 import com.valhora.backend.products.Product;
@@ -39,6 +40,7 @@ public class DataSeeder {
             String material,
             String strap,
             String color,
+            Availability availability,
             boolean isNew,
             boolean isBestSeller) {
     }
@@ -102,17 +104,23 @@ public class DataSeeder {
 
         List<SeedProduct> seeds = List.of(
                 new SeedProduct("Solvane Meridian Automatic", "SOL-AUTO-001", new BigDecimal("890.00"),
-                        Gender.MEN, Movement.AUTOMATIC, "Acero inoxidable", "Metal", "Plata", true, false),
+                        Gender.MEN, Movement.AUTOMATIC, "Acero inoxidable", "Metal", "Plata",
+                        Availability.IMMEDIATE, true, false),
                 new SeedProduct("Kronoss Chrono Sport", "KRO-CHR-002", new BigDecimal("650.00"),
-                        Gender.MEN, Movement.QUARTZ, "Titanio", "Caucho", "Negro", false, true),
+                        Gender.MEN, Movement.QUARTZ, "Titanio", "Caucho", "Negro",
+                        Availability.IN_TRANSIT, false, true),
                 new SeedProduct("Meridian Rose Classic", "MER-CLA-003", new BigDecimal("540.00"),
-                        Gender.WOMEN, Movement.QUARTZ, "Acero inoxidable", "Cuero", "Rosa", true, false),
+                        Gender.WOMEN, Movement.QUARTZ, "Acero inoxidable", "Cuero", "Rosa",
+                        Availability.IMMEDIATE, true, false),
                 new SeedProduct("Alto Norte Heritage", "ALT-HER-004", new BigDecimal("1200.00"),
-                        Gender.UNISEX, Movement.MECHANICAL, "Oro rosa", "Cuero", "Marrón", false, true),
+                        Gender.UNISEX, Movement.MECHANICAL, "Oro rosa", "Cuero", "Marrón",
+                        Availability.BY_ORDER, false, true),
                 new SeedProduct("Solvane Diver Pro", "SOL-DIV-005", new BigDecimal("980.00"),
-                        Gender.MEN, Movement.AUTOMATIC, "Cerámica", "Metal", "Azul", true, true),
+                        Gender.MEN, Movement.AUTOMATIC, "Cerámica", "Metal", "Azul",
+                        Availability.IMMEDIATE, true, true),
                 new SeedProduct("Kronoss Minimal", "KRO-MIN-006", new BigDecimal("420.00"),
-                        Gender.WOMEN, Movement.QUARTZ, "Acero inoxidable", "Metal", "Blanco", false, false)
+                        Gender.WOMEN, Movement.QUARTZ, "Acero inoxidable", "Metal", "Blanco",
+                        Availability.BY_ORDER, false, false)
         );
 
         for (int i = 0; i < seeds.size(); i++) {
@@ -137,6 +145,7 @@ public class DataSeeder {
                     .strapMaterial(seed.strap())
                     .color(seed.color())
                     .stock(15)
+                    .availability(seed.availability())
                     .isNew(seed.isNew())
                     .isBestSeller(seed.isBestSeller())
                     .imageUrls(new ArrayList<>(List.of(placeholderImage)))

@@ -85,6 +85,10 @@ public class Product {
     @Column(nullable = false)
     private int stock;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Availability availability;
+
     @Column(name = "is_new", nullable = false)
     private boolean isNew;
 

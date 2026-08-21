@@ -1,5 +1,6 @@
 package com.valhora.backend.products;
 
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -9,4 +10,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     boolean existsBySkuIgnoreCase(String sku);
 
     boolean existsBySlugIgnoreCase(String slug);
+
+    List<Product> findTop4ByBrand_IdAndIdNotOrderByCreatedAtDesc(UUID brandId, UUID id);
 }

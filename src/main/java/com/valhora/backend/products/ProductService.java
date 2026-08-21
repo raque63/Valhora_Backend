@@ -13,6 +13,7 @@ import com.valhora.backend.products.dto.ProductResponse;
 import com.valhora.backend.products.dto.ProductSummaryResponse;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,13 +55,21 @@ public class ProductService {
                 .and(ProductSpecifications.hasStrapMaterial(filter.strapMaterial()))
                 .and(ProductSpecifications.hasColor(filter.color()))
                 .and(ProductSpecifications.priceGreaterThanOrEqual(filter.minPrice()))
-                .and(ProductSpecifications.priceLessThanOrEqual(filter.maxPrice()));
+                .and(ProductSpecifications.priceLessThanOrEqual(filter.maxPrice()))
+                .and(ProductSpecifications.hasAvailability(filter.availability()));
 
         return productRepository.findAll(spec, pageable).map(productMapper::toSummary);
     }
 
     public ProductResponse findById(UUID id) {
         return productMapper.toResponse(getOrThrow(id));
+    }
+
+    public List<ProductSummaryResponse> findRelated(UUID id) {
+        Product product = getOrThrow(id);
+        return productRepository.findTop4ByBrand_IdAndIdNotOrderByCreatedAtDesc(product.getBrand().getId(), id).stream()
+                .map(productMapper::toSummary)
+                .toList();
     }
 
     @Transactional
@@ -83,6 +92,7 @@ public class ProductService {
                 .strapMaterial(request.strapMaterial())
                 .color(request.color())
                 .stock(request.stock())
+                .availability(request.availability())
                 .isNew(request.isNew())
                 .isBestSeller(request.isBestSeller())
                 .build();
@@ -110,6 +120,7 @@ public class ProductService {
         product.setStrapMaterial(request.strapMaterial());
         product.setColor(request.color());
         product.setStock(request.stock());
+        product.setAvailability(request.availability());
         product.setNew(request.isNew());
         product.setBestSeller(request.isBestSeller());
 
@@ -142,6 +153,7 @@ public class ProductService {
                 .strapMaterial(original.getStrapMaterial())
                 .color(original.getColor())
                 .stock(original.getStock())
+                .availability(original.getAvailability())
                 .isNew(original.isNew())
                 .isBestSeller(false)
                 .imageUrls(new ArrayList<>(original.getImageUrls()))
@@ -155,6 +167,13 @@ public class ProductService {
         Product product = getOrThrow(id);
         String url = cloudinaryService.upload(file);
         product.getImageUrls().add(url);
+        return productMapper.toResponse(productRepository.save(product));
+    }
+
+    @Transactional
+    public ProductResponse removeImage(UUID id, String imageUrl) {
+        Product product = getOrThrow(id);
+        product.getImageUrls().remove(imageUrl);
         return productMapper.toResponse(productRepository.save(product));
     }
 
