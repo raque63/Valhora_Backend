@@ -22,5 +22,6 @@ app:
     refresh-token-expiration-ms: 604800000
   seed:
     enabled: ${SEED_ENABLED:false}
+    create-admin: ${CREATE_ADMIN:false}
     admin-email: ${SEED_ADMIN_EMAIL:}
     admin-password: ${SEED_ADMIN_PASSWORD:}

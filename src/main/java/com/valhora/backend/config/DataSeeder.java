@@ -47,7 +47,8 @@ public class DataSeeder {
 
     @Bean
     CommandLineRunner seedData(
-            @Value("${app.seed.enabled}") boolean enabled,
+            @Value("${app.seed.enabled}") boolean seedCatalog,
+            @Value("${app.seed.create-admin:false}") boolean createAdmin,
             @Value("${app.seed.admin-email}") String adminEmail,
             @Value("${app.seed.admin-password}") String adminPassword,
             UserRepository userRepository,
@@ -56,10 +57,12 @@ public class DataSeeder {
             ProductRepository productRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
-            if (!enabled) {
+            if (createAdmin) {
+                seedAdmin(userRepository, passwordEncoder, adminEmail, adminPassword);
+            }
+            if (!seedCatalog) {
                 return;
             }
-            seedAdmin(userRepository, passwordEncoder, adminEmail, adminPassword);
             List<Brand> brands = seedBrands(brandRepository);
             List<Category> categories = seedCategories(categoryRepository);
             seedProducts(productRepository, brands, categories);
