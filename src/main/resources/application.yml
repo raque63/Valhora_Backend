@@ -14,7 +14,8 @@ spring:
         format_sql: true
 
 server:
-  port: 8080
+  address: 0.0.0.0
+  port: ${PORT:8080}
 
 springdoc:
   swagger-ui:
@@ -24,7 +25,9 @@ springdoc:
 
 app:
   cors:
-    allowed-origins: http://localhost:5173
+    allowed-origins:
+      - http://localhost:5173
+      - http://192.168.100.10:5173
   security:
     secure-cookies: false
   jwt:
