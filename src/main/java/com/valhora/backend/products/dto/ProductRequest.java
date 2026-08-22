@@ -45,8 +45,6 @@ public record ProductRequest(
 
         String collection,
 
-        String reference,
-
         String movementDetail,
 
         String caliber,
