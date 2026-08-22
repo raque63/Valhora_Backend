@@ -91,7 +91,6 @@ public class ProductService {
                 .material(request.material())
                 .strapMaterial(request.strapMaterial())
                 .color(request.color())
-                .collection(request.collection())
                 .movementDetail(request.movementDetail())
                 .caliber(request.caliber())
                 .powerReserve(request.powerReserve())
@@ -127,7 +126,6 @@ public class ProductService {
         product.setMaterial(request.material());
         product.setStrapMaterial(request.strapMaterial());
         product.setColor(request.color());
-        product.setCollection(request.collection());
         product.setMovementDetail(request.movementDetail());
         product.setCaliber(request.caliber());
         product.setPowerReserve(request.powerReserve());
@@ -168,7 +166,6 @@ public class ProductService {
                 .material(original.getMaterial())
                 .strapMaterial(original.getStrapMaterial())
                 .color(original.getColor())
-                .collection(original.getCollection())
                 .movementDetail(original.getMovementDetail())
                 .caliber(original.getCaliber())
                 .powerReserve(original.getPowerReserve())

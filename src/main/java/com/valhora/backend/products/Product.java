@@ -82,9 +82,6 @@ public class Product {
     @Column(nullable = false)
     private String color;
 
-    /** Línea/serie dentro de la marca, ej. "Seiko 5 Sports". */
-    private String collection;
-
     @Column(name = "movement_detail")
     private String movementDetail;
 

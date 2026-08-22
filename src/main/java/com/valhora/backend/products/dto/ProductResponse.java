@@ -24,7 +24,6 @@ public record ProductResponse(
         String material,
         String strapMaterial,
         String color,
-        String collection,
         String movementDetail,
         String caliber,
         String powerReserve,
