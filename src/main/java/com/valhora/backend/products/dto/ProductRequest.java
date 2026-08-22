@@ -43,6 +43,24 @@ public record ProductRequest(
         @NotBlank(message = "El color es obligatorio")
         String color,
 
+        String collection,
+
+        String reference,
+
+        String movementDetail,
+
+        String caliber,
+
+        String powerReserve,
+
+        String caseDiameter,
+
+        String thickness,
+
+        String crystal,
+
+        String waterResistance,
+
         @PositiveOrZero(message = "El stock no puede ser negativo")
         int stock,
 

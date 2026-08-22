@@ -82,6 +82,30 @@ public class Product {
     @Column(nullable = false)
     private String color;
 
+    /** Línea/serie dentro de la marca, ej. "Seiko 5 Sports". */
+    private String collection;
+
+    /** Referencia del fabricante, ej. "SSK019" (distinta del SKU interno). */
+    private String reference;
+
+    @Column(name = "movement_detail")
+    private String movementDetail;
+
+    private String caliber;
+
+    @Column(name = "power_reserve")
+    private String powerReserve;
+
+    @Column(name = "case_diameter")
+    private String caseDiameter;
+
+    private String thickness;
+
+    private String crystal;
+
+    @Column(name = "water_resistance")
+    private String waterResistance;
+
     @Column(nullable = false)
     private int stock;
 

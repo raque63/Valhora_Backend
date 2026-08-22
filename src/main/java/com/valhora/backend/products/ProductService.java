@@ -91,6 +91,15 @@ public class ProductService {
                 .material(request.material())
                 .strapMaterial(request.strapMaterial())
                 .color(request.color())
+                .collection(request.collection())
+                .reference(request.reference())
+                .movementDetail(request.movementDetail())
+                .caliber(request.caliber())
+                .powerReserve(request.powerReserve())
+                .caseDiameter(request.caseDiameter())
+                .thickness(request.thickness())
+                .crystal(request.crystal())
+                .waterResistance(request.waterResistance())
                 .stock(request.stock())
                 .availability(request.availability())
                 .isNew(request.isNew())
@@ -119,6 +128,15 @@ public class ProductService {
         product.setMaterial(request.material());
         product.setStrapMaterial(request.strapMaterial());
         product.setColor(request.color());
+        product.setCollection(request.collection());
+        product.setReference(request.reference());
+        product.setMovementDetail(request.movementDetail());
+        product.setCaliber(request.caliber());
+        product.setPowerReserve(request.powerReserve());
+        product.setCaseDiameter(request.caseDiameter());
+        product.setThickness(request.thickness());
+        product.setCrystal(request.crystal());
+        product.setWaterResistance(request.waterResistance());
         product.setStock(request.stock());
         product.setAvailability(request.availability());
         product.setNew(request.isNew());
@@ -152,6 +170,15 @@ public class ProductService {
                 .material(original.getMaterial())
                 .strapMaterial(original.getStrapMaterial())
                 .color(original.getColor())
+                .collection(original.getCollection())
+                .reference(original.getReference())
+                .movementDetail(original.getMovementDetail())
+                .caliber(original.getCaliber())
+                .powerReserve(original.getPowerReserve())
+                .caseDiameter(original.getCaseDiameter())
+                .thickness(original.getThickness())
+                .crystal(original.getCrystal())
+                .waterResistance(original.getWaterResistance())
                 .stock(original.getStock())
                 .availability(original.getAvailability())
                 .isNew(original.isNew())
