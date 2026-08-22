@@ -86,6 +86,13 @@
 			<version>${mapstruct.version}</version>
 		</dependency>
 
+		<!-- CSV import -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.11.0</version>
+		</dependency>
+
 		<!-- JWT -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>

@@ -1,5 +1,6 @@
 package com.valhora.backend.products;
 
+import com.valhora.backend.products.dto.ProductImportResult;
 import com.valhora.backend.products.dto.ProductRequest;
 import com.valhora.backend.products.dto.ProductResponse;
 import jakarta.validation.Valid;
@@ -23,9 +24,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductAdminController {
 
     private final ProductService productService;
+    private final ProductImportService productImportService;
 
-    public ProductAdminController(ProductService productService) {
+    public ProductAdminController(ProductService productService, ProductImportService productImportService) {
         this.productService = productService;
+        this.productImportService = productImportService;
     }
 
     @GetMapping("/{id}")
@@ -48,6 +51,11 @@ public class ProductAdminController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
         productService.delete(id);
+    }
+
+    @PostMapping(path = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ProductImportResult importCsv(@RequestParam("file") MultipartFile file) {
+        return productImportService.importCsv(file);
     }
 
     @PostMapping("/{id}/duplicate")
