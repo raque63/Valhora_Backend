@@ -5,8 +5,10 @@ import com.valhora.backend.products.dto.ProductRequest;
 import com.valhora.backend.products.dto.ProductResponse;
 import jakarta.validation.Valid;
 import java.util.UUID;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,8 +56,17 @@ public class ProductAdminController {
     }
 
     @PostMapping(path = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ProductImportResult importCsv(@RequestParam("file") MultipartFile file) {
-        return productImportService.importCsv(file);
+    public ProductImportResult importExcel(@RequestParam("file") MultipartFile file) {
+        return productImportService.importExcel(file);
+    }
+
+    @GetMapping("/import/template")
+    public ResponseEntity<byte[]> downloadImportTemplate() {
+        byte[] content = productImportService.buildTemplate();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=plantilla-productos.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(content);
     }
 
     @PostMapping("/{id}/duplicate")

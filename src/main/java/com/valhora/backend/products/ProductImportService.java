@@ -9,22 +9,40 @@ import com.valhora.backend.products.dto.ProductImportRowError;
 import com.valhora.backend.products.dto.ProductRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProductImportService {
+
+    private static final String[] TEMPLATE_HEADERS = {
+        "coleccion", "sku", "descripcion", "precio", "marca", "categoria", "genero", "movimiento",
+        "material", "correa", "color", "detalle_movimiento", "calibre", "reserva_marcha",
+        "diametro_caja", "grosor", "cristal", "resistencia_agua", "stock", "disponibilidad",
+        "nuevo", "mas_vendido"
+    };
+
+    private static final String[] TEMPLATE_EXAMPLE = {
+        "Seiko 5 Sports SSK019", "SSK019", "Reloj automático con caja de acero inoxidable.", "85000",
+        "Seiko", "", "MEN", "AUTOMATIC", "Acero inoxidable", "Acero inoxidable", "Gris carbón",
+        "Automático con cuerda manual", "4R34", "Aprox. 41 horas", "42,5 mm", "13,6 mm",
+        "Hardlex con lupa", "100 m / 10 bar", "5", "IMMEDIATE", "false", "false"
+    };
 
     private static final Map<String, Gender> GENDER_ALIASES = Map.of(
             "HOMBRE", Gender.MEN,
@@ -58,44 +76,93 @@ public class ProductImportService {
         this.validator = validator;
     }
 
-    public ProductImportResult importCsv(MultipartFile file) {
+    public ProductImportResult importExcel(MultipartFile file) {
         List<ProductImportRowError> errors = new ArrayList<>();
         int created = 0;
 
-        try (var reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
-                CSVParser parser = CSVFormat.DEFAULT.builder()
-                        .setHeader()
-                        .setSkipHeaderRecord(true)
-                        .setIgnoreSurroundingSpaces(true)
-                        .setTrim(true)
-                        .build()
-                        .parse(reader)) {
+        try (InputStream inputStream = file.getInputStream();
+                Workbook workbook = new XSSFWorkbook(inputStream)) {
 
-            int rowNumber = 2;
-            for (CSVRecord record : parser) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Row headerRow = sheet.getRow(sheet.getFirstRowNum());
+            if (headerRow == null) {
+                throw new IllegalArgumentException("El archivo no tiene encabezados");
+            }
+            Map<String, Integer> columnIndex = readHeader(headerRow);
+
+            for (int rowNum = headerRow.getRowNum() + 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                Row row = sheet.getRow(rowNum);
+                if (row == null || isRowBlank(row, columnIndex)) {
+                    continue;
+                }
                 try {
-                    ProductRequest request = toRequest(record);
+                    ProductRequest request = toRequest(row, columnIndex);
                     validate(request);
                     productService.create(request);
                     created++;
                 } catch (Exception ex) {
-                    errors.add(new ProductImportRowError(rowNumber, ex.getMessage()));
+                    errors.add(new ProductImportRowError(rowNum + 1, ex.getMessage()));
                 }
-                rowNumber++;
             }
         } catch (IOException ex) {
-            throw new IllegalArgumentException("No se pudo leer el archivo CSV: " + ex.getMessage());
+            throw new IllegalArgumentException("No se pudo leer el archivo Excel: " + ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            throw ex;
+        } catch (RuntimeException ex) {
+            throw new IllegalArgumentException("El archivo no es un Excel (.xlsx) válido");
         }
 
         return new ProductImportResult(created, errors.size(), errors);
     }
 
-    private ProductRequest toRequest(CSVRecord record) {
-        String brandName = get(record, "marca");
+    public byte[] buildTemplate() {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Productos");
+
+            Row header = sheet.createRow(0);
+            for (int i = 0; i < TEMPLATE_HEADERS.length; i++) {
+                header.createCell(i).setCellValue(TEMPLATE_HEADERS[i]);
+            }
+
+            Row example = sheet.createRow(1);
+            for (int i = 0; i < TEMPLATE_EXAMPLE.length; i++) {
+                example.createCell(i).setCellValue(TEMPLATE_EXAMPLE[i]);
+            }
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            return out.toByteArray();
+        } catch (IOException ex) {
+            throw new IllegalStateException("No se pudo generar la plantilla", ex);
+        }
+    }
+
+    private Map<String, Integer> readHeader(Row headerRow) {
+        Map<String, Integer> columnIndex = new HashMap<>();
+        for (Cell cell : headerRow) {
+            String header = cellToString(cell).toLowerCase(Locale.ROOT);
+            if (!header.isBlank()) {
+                columnIndex.put(header, cell.getColumnIndex());
+            }
+        }
+        return columnIndex;
+    }
+
+    private boolean isRowBlank(Row row, Map<String, Integer> columnIndex) {
+        for (int index : columnIndex.values()) {
+            if (!cellToString(row.getCell(index)).isBlank()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private ProductRequest toRequest(Row row, Map<String, Integer> columnIndex) {
+        String brandName = get(row, columnIndex, "marca");
         Brand brand = brandRepository.findByNameIgnoreCase(brandName)
                 .orElseThrow(() -> new IllegalArgumentException("Marca no encontrada: " + brandName));
 
-        String categoryName = get(record, "categoria");
+        String categoryName = get(row, columnIndex, "categoria");
         UUID categoryId = null;
         if (!categoryName.isBlank()) {
             Category category = categoryRepository.findByNameIgnoreCase(categoryName)
@@ -104,28 +171,28 @@ public class ProductImportService {
         }
 
         return new ProductRequest(
-                get(record, "coleccion"),
-                get(record, "sku"),
-                getOrNull(record, "descripcion"),
-                parsePrice(get(record, "precio")),
+                get(row, columnIndex, "coleccion"),
+                get(row, columnIndex, "sku"),
+                getOrNull(row, columnIndex, "descripcion"),
+                parsePrice(get(row, columnIndex, "precio")),
                 brand.getId(),
                 categoryId,
-                parseGender(get(record, "genero")),
-                parseMovement(get(record, "movimiento")),
-                get(record, "material"),
-                get(record, "correa"),
-                get(record, "color"),
-                getOrNull(record, "detalle_movimiento"),
-                getOrNull(record, "calibre"),
-                getOrNull(record, "reserva_marcha"),
-                getOrNull(record, "diametro_caja"),
-                getOrNull(record, "grosor"),
-                getOrNull(record, "cristal"),
-                getOrNull(record, "resistencia_agua"),
-                parseStock(get(record, "stock")),
-                parseAvailability(get(record, "disponibilidad")),
-                parseBoolean(getOrNull(record, "nuevo")),
-                parseBoolean(getOrNull(record, "mas_vendido")));
+                parseGender(get(row, columnIndex, "genero")),
+                parseMovement(get(row, columnIndex, "movimiento")),
+                get(row, columnIndex, "material"),
+                get(row, columnIndex, "correa"),
+                get(row, columnIndex, "color"),
+                getOrNull(row, columnIndex, "detalle_movimiento"),
+                getOrNull(row, columnIndex, "calibre"),
+                getOrNull(row, columnIndex, "reserva_marcha"),
+                getOrNull(row, columnIndex, "diametro_caja"),
+                getOrNull(row, columnIndex, "grosor"),
+                getOrNull(row, columnIndex, "cristal"),
+                getOrNull(row, columnIndex, "resistencia_agua"),
+                parseStock(get(row, columnIndex, "stock")),
+                parseAvailability(get(row, columnIndex, "disponibilidad")),
+                parseBoolean(getOrNull(row, columnIndex, "nuevo")),
+                parseBoolean(getOrNull(row, columnIndex, "mas_vendido")));
     }
 
     private void validate(ProductRequest request) {
@@ -139,16 +206,36 @@ public class ProductImportService {
         }
     }
 
-    private String get(CSVRecord record, String column) {
-        if (!record.isMapped(column) || record.get(column) == null) {
+    private String get(Row row, Map<String, Integer> columnIndex, String column) {
+        Integer index = columnIndex.get(column);
+        if (index == null) {
             return "";
         }
-        return record.get(column).trim();
+        return cellToString(row.getCell(index));
     }
 
-    private String getOrNull(CSVRecord record, String column) {
-        String value = get(record, column);
+    private String getOrNull(Row row, Map<String, Integer> columnIndex, String column) {
+        String value = get(row, columnIndex, column);
         return value.isBlank() ? null : value;
+    }
+
+    private String cellToString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue().trim();
+            case NUMERIC -> formatNumeric(cell.getNumericCellValue());
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            default -> "";
+        };
+    }
+
+    private String formatNumeric(double value) {
+        if (value == Math.floor(value) && !Double.isInfinite(value)) {
+            return String.valueOf((long) value);
+        }
+        return BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
     }
 
     private BigDecimal parsePrice(String raw) {
@@ -171,12 +258,12 @@ public class ProductImportService {
         if (raw == null) {
             return false;
         }
-        String normalized = raw.trim().toUpperCase();
+        String normalized = raw.trim().toUpperCase(Locale.ROOT);
         return normalized.equals("TRUE") || normalized.equals("SI") || normalized.equals("SÍ") || normalized.equals("1");
     }
 
     private Gender parseGender(String raw) {
-        String normalized = raw.trim().toUpperCase();
+        String normalized = raw.trim().toUpperCase(Locale.ROOT);
         Gender alias = GENDER_ALIASES.get(normalized);
         if (alias != null) {
             return alias;
@@ -189,7 +276,7 @@ public class ProductImportService {
     }
 
     private Movement parseMovement(String raw) {
-        String normalized = raw.trim().toUpperCase();
+        String normalized = raw.trim().toUpperCase(Locale.ROOT);
         Movement alias = MOVEMENT_ALIASES.get(normalized);
         if (alias != null) {
             return alias;
@@ -202,7 +289,7 @@ public class ProductImportService {
     }
 
     private Availability parseAvailability(String raw) {
-        String normalized = raw.trim().toUpperCase();
+        String normalized = raw.trim().toUpperCase(Locale.ROOT);
         Availability alias = AVAILABILITY_ALIASES.get(normalized);
         if (alias != null) {
             return alias;
