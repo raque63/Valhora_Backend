@@ -43,8 +43,6 @@ public record ProductRequest(
         @NotBlank(message = "El color es obligatorio")
         String color,
 
-        String movementDetail,
-
         String powerReserve,
 
         String caseDiameter,

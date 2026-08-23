@@ -31,8 +31,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductImportService {
 
     private static final String[] TEMPLATE_HEADERS = {
-        "coleccion", "sku", "descripcion", "precio", "marca", "categoria", "genero", "movimiento",
-        "material", "material_brazalete", "color", "detalle_movimiento", "reserva_marcha",
+        "coleccion", "referencia", "descripcion", "precio", "marca", "categoria", "genero", "movimiento",
+        "material", "material_brazalete", "color", "reserva_marcha",
         "diametro_caja", "material_cristal", "resistencia_agua", "stock", "disponibilidad",
         "nuevo", "mas_vendido"
     };
@@ -40,7 +40,7 @@ public class ProductImportService {
     private static final String[] TEMPLATE_EXAMPLE = {
         "Seiko 5 Sports SSK019", "SSK019", "Reloj automático con caja de acero inoxidable.", "85000",
         "Seiko", "", "MEN", "AUTOMATIC", "Acero inoxidable", "Acero inoxidable", "Gris carbón",
-        "Automático con cuerda manual", "Aprox. 41 horas", "42,5 mm",
+        "Aprox. 41 horas", "42,5 mm",
         "Hardlex con lupa", "100 m / 10 bar", "5", "IMMEDIATE", "false", "false"
     };
 
@@ -172,7 +172,7 @@ public class ProductImportService {
 
         return new ProductRequest(
                 get(row, columnIndex, "coleccion"),
-                get(row, columnIndex, "sku"),
+                get(row, columnIndex, "referencia"),
                 getOrNull(row, columnIndex, "descripcion"),
                 parsePrice(get(row, columnIndex, "precio")),
                 brand.getId(),
@@ -182,7 +182,6 @@ public class ProductImportService {
                 get(row, columnIndex, "material"),
                 get(row, columnIndex, "material_brazalete"),
                 get(row, columnIndex, "color"),
-                getOrNull(row, columnIndex, "detalle_movimiento"),
                 getOrNull(row, columnIndex, "reserva_marcha"),
                 getOrNull(row, columnIndex, "diametro_caja"),
                 getOrNull(row, columnIndex, "material_cristal"),

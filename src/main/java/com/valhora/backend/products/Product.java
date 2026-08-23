@@ -82,9 +82,6 @@ public class Product {
     @Column(nullable = false)
     private String color;
 
-    @Column(name = "movement_detail")
-    private String movementDetail;
-
     @Column(name = "power_reserve")
     private String powerReserve;
 

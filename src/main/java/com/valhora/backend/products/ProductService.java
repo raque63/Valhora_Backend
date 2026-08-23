@@ -91,7 +91,6 @@ public class ProductService {
                 .material(request.material())
                 .strapMaterial(request.strapMaterial())
                 .color(request.color())
-                .movementDetail(request.movementDetail())
                 .powerReserve(request.powerReserve())
                 .caseDiameter(request.caseDiameter())
                 .crystal(request.crystal())
@@ -124,7 +123,6 @@ public class ProductService {
         product.setMaterial(request.material());
         product.setStrapMaterial(request.strapMaterial());
         product.setColor(request.color());
-        product.setMovementDetail(request.movementDetail());
         product.setPowerReserve(request.powerReserve());
         product.setCaseDiameter(request.caseDiameter());
         product.setCrystal(request.crystal());
@@ -162,7 +160,6 @@ public class ProductService {
                 .material(original.getMaterial())
                 .strapMaterial(original.getStrapMaterial())
                 .color(original.getColor())
-                .movementDetail(original.getMovementDetail())
                 .powerReserve(original.getPowerReserve())
                 .caseDiameter(original.getCaseDiameter())
                 .crystal(original.getCrystal())

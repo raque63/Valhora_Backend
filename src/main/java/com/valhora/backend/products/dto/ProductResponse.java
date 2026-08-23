@@ -24,7 +24,6 @@ public record ProductResponse(
         String material,
         String strapMaterial,
         String color,
-        String movementDetail,
         String powerReserve,
         String caseDiameter,
         String crystal,
