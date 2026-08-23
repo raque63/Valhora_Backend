@@ -32,15 +32,15 @@ public class ProductImportService {
 
     private static final String[] TEMPLATE_HEADERS = {
         "coleccion", "sku", "descripcion", "precio", "marca", "categoria", "genero", "movimiento",
-        "material", "correa", "color", "detalle_movimiento", "calibre", "reserva_marcha",
-        "diametro_caja", "grosor", "cristal", "resistencia_agua", "stock", "disponibilidad",
+        "material", "material_brazalete", "color", "detalle_movimiento", "reserva_marcha",
+        "diametro_caja", "material_cristal", "resistencia_agua", "stock", "disponibilidad",
         "nuevo", "mas_vendido"
     };
 
     private static final String[] TEMPLATE_EXAMPLE = {
         "Seiko 5 Sports SSK019", "SSK019", "Reloj automático con caja de acero inoxidable.", "85000",
         "Seiko", "", "MEN", "AUTOMATIC", "Acero inoxidable", "Acero inoxidable", "Gris carbón",
-        "Automático con cuerda manual", "4R34", "Aprox. 41 horas", "42,5 mm", "13,6 mm",
+        "Automático con cuerda manual", "Aprox. 41 horas", "42,5 mm",
         "Hardlex con lupa", "100 m / 10 bar", "5", "IMMEDIATE", "false", "false"
     };
 
@@ -180,14 +180,12 @@ public class ProductImportService {
                 parseGender(get(row, columnIndex, "genero")),
                 parseMovement(get(row, columnIndex, "movimiento")),
                 get(row, columnIndex, "material"),
-                get(row, columnIndex, "correa"),
+                get(row, columnIndex, "material_brazalete"),
                 get(row, columnIndex, "color"),
                 getOrNull(row, columnIndex, "detalle_movimiento"),
-                getOrNull(row, columnIndex, "calibre"),
                 getOrNull(row, columnIndex, "reserva_marcha"),
                 getOrNull(row, columnIndex, "diametro_caja"),
-                getOrNull(row, columnIndex, "grosor"),
-                getOrNull(row, columnIndex, "cristal"),
+                getOrNull(row, columnIndex, "material_cristal"),
                 getOrNull(row, columnIndex, "resistencia_agua"),
                 parseStock(get(row, columnIndex, "stock")),
                 parseAvailability(get(row, columnIndex, "disponibilidad")),

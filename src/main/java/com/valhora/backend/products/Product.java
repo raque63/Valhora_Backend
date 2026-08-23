@@ -85,15 +85,11 @@ public class Product {
     @Column(name = "movement_detail")
     private String movementDetail;
 
-    private String caliber;
-
     @Column(name = "power_reserve")
     private String powerReserve;
 
     @Column(name = "case_diameter")
     private String caseDiameter;
-
-    private String thickness;
 
     private String crystal;
 

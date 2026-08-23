@@ -45,13 +45,9 @@ public record ProductRequest(
 
         String movementDetail,
 
-        String caliber,
-
         String powerReserve,
 
         String caseDiameter,
-
-        String thickness,
 
         String crystal,
 

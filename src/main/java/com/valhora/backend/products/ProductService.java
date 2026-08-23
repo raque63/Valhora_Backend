@@ -92,10 +92,8 @@ public class ProductService {
                 .strapMaterial(request.strapMaterial())
                 .color(request.color())
                 .movementDetail(request.movementDetail())
-                .caliber(request.caliber())
                 .powerReserve(request.powerReserve())
                 .caseDiameter(request.caseDiameter())
-                .thickness(request.thickness())
                 .crystal(request.crystal())
                 .waterResistance(request.waterResistance())
                 .stock(request.stock())
@@ -127,10 +125,8 @@ public class ProductService {
         product.setStrapMaterial(request.strapMaterial());
         product.setColor(request.color());
         product.setMovementDetail(request.movementDetail());
-        product.setCaliber(request.caliber());
         product.setPowerReserve(request.powerReserve());
         product.setCaseDiameter(request.caseDiameter());
-        product.setThickness(request.thickness());
         product.setCrystal(request.crystal());
         product.setWaterResistance(request.waterResistance());
         product.setStock(request.stock());
@@ -167,10 +163,8 @@ public class ProductService {
                 .strapMaterial(original.getStrapMaterial())
                 .color(original.getColor())
                 .movementDetail(original.getMovementDetail())
-                .caliber(original.getCaliber())
                 .powerReserve(original.getPowerReserve())
                 .caseDiameter(original.getCaseDiameter())
-                .thickness(original.getThickness())
                 .crystal(original.getCrystal())
                 .waterResistance(original.getWaterResistance())
                 .stock(original.getStock())
