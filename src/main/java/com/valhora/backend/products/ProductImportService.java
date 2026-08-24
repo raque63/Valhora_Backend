@@ -48,12 +48,17 @@ public class ProductImportService {
             "HOMBRE", Gender.MEN,
             "MUJER", Gender.WOMEN);
 
-    private static final Map<String, Movement> MOVEMENT_ALIASES = Map.of(
-            "CUARZO", Movement.QUARTZ,
-            "AUTOMATICO", Movement.AUTOMATIC,
-            "AUTOMÁTICO", Movement.AUTOMATIC,
-            "MECANICO", Movement.MECHANICAL,
-            "MECÁNICO", Movement.MECHANICAL);
+    private static final Map<String, Movement> MOVEMENT_ALIASES = Map.ofEntries(
+            Map.entry("CUARZO", Movement.QUARTZ),
+            Map.entry("AUTOMATICO", Movement.AUTOMATIC),
+            Map.entry("AUTOMÁTICO", Movement.AUTOMATIC),
+            Map.entry("MECANICO", Movement.MECHANICAL),
+            Map.entry("MECÁNICO", Movement.MECHANICAL),
+            Map.entry("ECO-DRIVE", Movement.ECO_DRIVE),
+            Map.entry("ECO DRIVE", Movement.ECO_DRIVE),
+            Map.entry("ECODRIVE", Movement.ECO_DRIVE),
+            Map.entry("CUARZO Y DIGITAL", Movement.QUARTZ_DIGITAL),
+            Map.entry("CUARZO_Y_DIGITAL", Movement.QUARTZ_DIGITAL));
 
     private static final Map<String, Availability> AVAILABILITY_ALIASES = Map.of(
             "INMEDIATA", Availability.IMMEDIATE,
@@ -129,11 +134,50 @@ public class ProductImportService {
                 example.createCell(i).setCellValue(TEMPLATE_EXAMPLE[i]);
             }
 
+            buildValuesSheet(workbook);
+
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
             return out.toByteArray();
         } catch (IOException ex) {
             throw new IllegalStateException("No se pudo generar la plantilla", ex);
+        }
+    }
+
+    private void buildValuesSheet(Workbook workbook) {
+        Sheet sheet = workbook.createSheet("Valores permitidos");
+
+        Row header = sheet.createRow(0);
+        header.createCell(0).setCellValue("Columna");
+        header.createCell(1).setCellValue("Valores permitidos");
+
+        String brandNames = brandRepository.findAll().stream()
+                .map(Brand::getName)
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("(sin marcas registradas)");
+
+        String categoryNames = categoryRepository.findAll().stream()
+                .map(Category::getName)
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("(sin categorías registradas)");
+
+        String[][] rows = {
+            {"marca", brandNames + " (debe existir en el catálogo, se escribe tal cual)"},
+            {"categoria", categoryNames + " (opcional, debe existir en el catálogo)"},
+            {"genero", "MEN, WOMEN, UNISEX (también: HOMBRE, MUJER)"},
+            {"movimiento",
+                "QUARTZ, AUTOMATIC, MECHANICAL, ECO_DRIVE, DIGITAL, QUARTZ_DIGITAL "
+                        + "(también: CUARZO, AUTOMATICO, MECANICO, ECO-DRIVE, ECO DRIVE, CUARZO Y DIGITAL)"},
+            {"disponibilidad", "IMMEDIATE, IN_TRANSIT, BY_ORDER (también: INMEDIATA, EN_CAMINO, POR_ENCARGO)"},
+            {"nuevo / mas_vendido", "TRUE, FALSE (también: SI, NO, 1, 0). Si se deja vacío, se toma como FALSE"},
+        };
+
+        for (int i = 0; i < rows.length; i++) {
+            Row row = sheet.createRow(i + 1);
+            row.createCell(0).setCellValue(rows[i][0]);
+            row.createCell(1).setCellValue(rows[i][1]);
         }
     }
 
