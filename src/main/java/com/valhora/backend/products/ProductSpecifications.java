@@ -54,4 +54,12 @@ final class ProductSpecifications {
     static Specification<Product> hasAvailability(Availability availability) {
         return (root, query, cb) -> availability == null ? null : cb.equal(root.get("availability"), availability);
     }
+
+    static Specification<Product> isNew(Boolean isNew) {
+        return (root, query, cb) -> isNew == null ? null : cb.equal(root.get("isNew"), isNew);
+    }
+
+    static Specification<Product> isBestSeller(Boolean isBestSeller) {
+        return (root, query, cb) -> isBestSeller == null ? null : cb.equal(root.get("isBestSeller"), isBestSeller);
+    }
 }

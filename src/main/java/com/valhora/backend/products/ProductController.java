@@ -37,12 +37,15 @@ public class ProductController {
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) Availability availability,
+            @RequestParam(required = false) Boolean isNew,
+            @RequestParam(required = false) Boolean isBestSeller,
             @RequestParam(defaultValue = "recent") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         ProductFilter filter = new ProductFilter(
-                brandId, categoryId, gender, movement, material, strapMaterial, color, minPrice, maxPrice, availability);
+                brandId, categoryId, gender, movement, material, strapMaterial, color, minPrice, maxPrice,
+                availability, isNew, isBestSeller);
         Pageable pageable = PageRequest.of(page, size, resolveSort(sort));
 
         return productService.search(filter, pageable);

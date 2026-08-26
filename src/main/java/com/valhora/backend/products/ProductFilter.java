@@ -13,6 +13,8 @@ public record ProductFilter(
         String color,
         BigDecimal minPrice,
         BigDecimal maxPrice,
-        Availability availability
+        Availability availability,
+        Boolean isNew,
+        Boolean isBestSeller
 ) {
 }

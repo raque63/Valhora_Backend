@@ -56,7 +56,9 @@ public class ProductService {
                 .and(ProductSpecifications.hasColor(filter.color()))
                 .and(ProductSpecifications.priceGreaterThanOrEqual(filter.minPrice()))
                 .and(ProductSpecifications.priceLessThanOrEqual(filter.maxPrice()))
-                .and(ProductSpecifications.hasAvailability(filter.availability()));
+                .and(ProductSpecifications.hasAvailability(filter.availability()))
+                .and(ProductSpecifications.isNew(filter.isNew()))
+                .and(ProductSpecifications.isBestSeller(filter.isBestSeller()));
 
         return productRepository.findAll(spec, pageable).map(productMapper::toSummary);
     }
