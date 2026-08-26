@@ -4,6 +4,7 @@ import com.valhora.backend.products.dto.ProductImportResult;
 import com.valhora.backend.products.dto.ProductRequest;
 import com.valhora.backend.products.dto.ProductResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -83,5 +84,10 @@ public class ProductAdminController {
     @DeleteMapping("/{id}/images")
     public ProductResponse removeImage(@PathVariable UUID id, @RequestParam String url) {
         return productService.removeImage(id, url);
+    }
+
+    @PutMapping("/{id}/images/order")
+    public ProductResponse reorderImages(@PathVariable UUID id, @RequestBody List<String> imageUrls) {
+        return productService.reorderImages(id, imageUrls);
     }
 }

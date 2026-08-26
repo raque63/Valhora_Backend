@@ -13,7 +13,9 @@ import com.valhora.backend.products.dto.ProductResponse;
 import com.valhora.backend.products.dto.ProductSummaryResponse;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -188,6 +190,18 @@ public class ProductService {
     public ProductResponse removeImage(UUID id, String imageUrl) {
         Product product = getOrThrow(id);
         product.getImageUrls().remove(imageUrl);
+        return productMapper.toResponse(productRepository.save(product));
+    }
+
+    @Transactional
+    public ProductResponse reorderImages(UUID id, List<String> imageUrls) {
+        Product product = getOrThrow(id);
+        Set<String> current = new HashSet<>(product.getImageUrls());
+        Set<String> requested = new HashSet<>(imageUrls);
+        if (!current.equals(requested)) {
+            throw new IllegalArgumentException("El nuevo orden debe contener exactamente las mismas imágenes");
+        }
+        product.setImageUrls(new ArrayList<>(imageUrls));
         return productMapper.toResponse(productRepository.save(product));
     }
 
