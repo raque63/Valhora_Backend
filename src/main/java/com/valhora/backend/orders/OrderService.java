@@ -6,6 +6,7 @@ import com.valhora.backend.cart.dto.CartResponse;
 import com.valhora.backend.common.exception.ResourceNotFoundException;
 import com.valhora.backend.common.storage.CloudinaryService;
 import com.valhora.backend.notifications.EmailService;
+import com.valhora.backend.notifications.WhatsAppService;
 import com.valhora.backend.orders.dto.AdminOrderUpdateRequest;
 import com.valhora.backend.orders.dto.CreateOrderRequest;
 import com.valhora.backend.orders.dto.OrderItemResponse;
@@ -28,6 +29,7 @@ public class OrderService {
     private final CartService cartService;
     private final CloudinaryService cloudinaryService;
     private final EmailService emailService;
+    private final WhatsAppService whatsAppService;
     private final JdbcTemplate jdbcTemplate;
 
     public OrderService(
@@ -35,11 +37,13 @@ public class OrderService {
             CartService cartService,
             CloudinaryService cloudinaryService,
             EmailService emailService,
+            WhatsAppService whatsAppService,
             JdbcTemplate jdbcTemplate) {
         this.orderRepository = orderRepository;
         this.cartService = cartService;
         this.cloudinaryService = cloudinaryService;
         this.emailService = emailService;
+        this.whatsAppService = whatsAppService;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -92,7 +96,7 @@ public class OrderService {
         cartService.clear(userId);
 
         emailService.sendNewOrderToAdmin(saved);
-        emailService.sendOrderConfirmationToCustomer(saved);
+        whatsAppService.notifyAdminNewOrder(saved);
 
         return toResponse(saved);
     }
@@ -106,7 +110,29 @@ public class OrderService {
         order.setPaymentProofUrl(cloudinaryService.uploadPaymentProof(file));
         Order saved = orderRepository.save(order);
         emailService.sendProofReceivedToAdmin(saved);
+        whatsAppService.notifyAdminProofUploaded(saved);
         return toResponse(saved);
+    }
+
+    public List<OrderSummaryResponse> findMyOrders(UUID userId) {
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                .map(order -> new OrderSummaryResponse(
+                        order.getId(),
+                        order.getOrderNumber(),
+                        order.getStatus(),
+                        order.getCustomerName(),
+                        order.getItems().stream().mapToInt(OrderItem::getQuantity).sum(),
+                        order.getTotal(),
+                        order.getCreatedAt()))
+                .toList();
+    }
+
+    public OrderResponse findMyOrderById(UUID userId, UUID orderId) {
+        Order order = getOrThrow(orderId);
+        if (!order.getUserId().equals(userId)) {
+            throw new ResourceNotFoundException("Pedido no encontrado");
+        }
+        return toResponse(order);
     }
 
     public Page<OrderSummaryResponse> adminSearch(OrderStatus status, Pageable pageable) {

@@ -59,22 +59,6 @@ public class EmailService {
         send(adminEmail, subject, body);
     }
 
-    public void sendOrderConfirmationToCustomer(Order order) {
-        String subject = "Pedido #VH-" + order.getOrderNumber() + " confirmado - Valhora";
-        String body = wrap(
-                "¡Gracias por tu compra!",
-                "Pedido #VH-" + order.getOrderNumber(),
-                "<p style=\"margin:0 0 20px;font-size:14px;color:#4a4a4a;\">Recibimos tu pedido y lo estamos preparando.</p>"
-                        + itemsTable(order)
-                        + totalsTable(order)
-                        + spacer()
-                        + infoRow("Método de pago", describePayment(order))
-                        + infoRow("Entrega", describeDelivery(order))
-                        + spacer()
-                        + "<p style=\"margin:20px 0 0;font-size:13px;color:#6b6b6b;\">Te contactaremos para confirmar tu pago y coordinar la entrega.</p>");
-        send(order.getCustomerEmail(), subject, body);
-    }
-
     public void sendProofReceivedToAdmin(Order order) {
         String subject = "Comprobante recibido - Pedido #VH-" + order.getOrderNumber();
         String body = wrap(
