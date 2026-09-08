@@ -13,6 +13,7 @@ public class CloudinaryService {
 
     private static final String PRODUCTS_FOLDER = "valhora/products";
     private static final String BRANDS_FOLDER = "valhora/brands";
+    private static final String PAYMENT_PROOFS_FOLDER = "valhora/payment-proofs";
 
     private final Cloudinary cloudinary;
 
@@ -26,6 +27,10 @@ public class CloudinaryService {
 
     public String uploadBrandLogo(MultipartFile file) {
         return upload(file, BRANDS_FOLDER);
+    }
+
+    public String uploadPaymentProof(MultipartFile file) {
+        return upload(file, PAYMENT_PROOFS_FOLDER);
     }
 
     private String upload(MultipartFile file, String folder) {

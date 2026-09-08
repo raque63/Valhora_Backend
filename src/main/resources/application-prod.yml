@@ -25,3 +25,4 @@ app:
     create-admin: ${CREATE_ADMIN:false}
     admin-email: ${SEED_ADMIN_EMAIL:}
     admin-password: ${SEED_ADMIN_PASSWORD:}
+  frontend-base-url: ${FRONTEND_BASE_URL:https://valhoracollection.com}

@@ -60,7 +60,8 @@ public class SecurityConfig {
                                 "/api/v1/products/**",
                                 "/api/v1/brands/**",
                                 "/api/v1/categories/**",
-                                "/api/v1/reviews")
+                                "/api/v1/reviews",
+                                "/api/v1/payment-settings")
                         .permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

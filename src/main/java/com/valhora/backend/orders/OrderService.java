@@ -4,47 +4,75 @@ import com.valhora.backend.cart.CartService;
 import com.valhora.backend.cart.dto.CartItemResponse;
 import com.valhora.backend.cart.dto.CartResponse;
 import com.valhora.backend.common.exception.ResourceNotFoundException;
+import com.valhora.backend.common.storage.CloudinaryService;
+import com.valhora.backend.notifications.EmailService;
 import com.valhora.backend.orders.dto.AdminOrderUpdateRequest;
+import com.valhora.backend.orders.dto.CreateOrderRequest;
 import com.valhora.backend.orders.dto.OrderItemResponse;
 import com.valhora.backend.orders.dto.OrderResponse;
 import com.valhora.backend.orders.dto.OrderSummaryResponse;
-import com.valhora.backend.users.User;
-import com.valhora.backend.users.UserRepository;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final CartService cartService;
-    private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService;
+    private final EmailService emailService;
+    private final JdbcTemplate jdbcTemplate;
 
-    public OrderService(OrderRepository orderRepository, CartService cartService, UserRepository userRepository) {
+    public OrderService(
+            OrderRepository orderRepository,
+            CartService cartService,
+            CloudinaryService cloudinaryService,
+            EmailService emailService,
+            JdbcTemplate jdbcTemplate) {
         this.orderRepository = orderRepository;
         this.cartService = cartService;
-        this.userRepository = userRepository;
+        this.cloudinaryService = cloudinaryService;
+        this.emailService = emailService;
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @PostConstruct
+    void ensureOrderNumberSequence() {
+        jdbcTemplate.execute("CREATE SEQUENCE IF NOT EXISTS order_number_seq START WITH 1000 INCREMENT BY 1");
+    }
+
+    private Long nextOrderNumber() {
+        return jdbcTemplate.queryForObject("SELECT nextval('order_number_seq')", Long.class);
     }
 
     @Transactional
-    public OrderResponse createFromCart(UUID userId, String shippingAddress, String customerNote) {
+    public OrderResponse createFromCart(UUID userId, CreateOrderRequest request) {
         CartResponse cart = cartService.getCart(userId);
         if (cart.items().isEmpty()) {
             throw new IllegalArgumentException("El carrito está vacío");
         }
 
         Order order = Order.builder()
+                .orderNumber(nextOrderNumber())
                 .userId(userId)
                 .status(OrderStatus.RECEIVED)
-                .shippingAddress(blankToNull(shippingAddress))
-                .customerNote(blankToNull(customerNote))
+                .customerName(request.customerName())
+                .customerPhone(request.customerPhone())
+                .customerEmail(request.customerEmail())
+                .province(request.province())
+                .canton(request.canton())
+                .district(request.district())
+                .deliveryMethod(request.deliveryMethod())
+                .paymentMethod(request.paymentMethod())
+                .shippingAddress(blankToNull(request.shippingAddress()))
+                .customerNote(blankToNull(request.customerNote()))
                 .itemsSubtotal(cart.subtotal())
                 .total(cart.subtotal())
                 .build();
@@ -63,8 +91,22 @@ public class OrderService {
         Order saved = orderRepository.save(order);
         cartService.clear(userId);
 
-        User user = userRepository.findById(userId).orElse(null);
-        return toResponse(saved, user);
+        emailService.sendNewOrderToAdmin(saved);
+        emailService.sendOrderConfirmationToCustomer(saved);
+
+        return toResponse(saved);
+    }
+
+    @Transactional
+    public OrderResponse uploadPaymentProof(UUID userId, UUID orderId, MultipartFile file) {
+        Order order = getOrThrow(orderId);
+        if (!order.getUserId().equals(userId)) {
+            throw new ResourceNotFoundException("Pedido no encontrado");
+        }
+        order.setPaymentProofUrl(cloudinaryService.uploadPaymentProof(file));
+        Order saved = orderRepository.save(order);
+        emailService.sendProofReceivedToAdmin(saved);
+        return toResponse(saved);
     }
 
     public Page<OrderSummaryResponse> adminSearch(OrderStatus status, Pageable pageable) {
@@ -72,26 +114,24 @@ public class OrderService {
                 ? orderRepository.findAll(pageable)
                 : orderRepository.findByStatus(status, pageable);
 
-        Map<UUID, User> usersById = loadUsers(orders.getContent());
-
         return orders.map(order -> new OrderSummaryResponse(
                 order.getId(),
+                order.getOrderNumber(),
                 order.getStatus(),
-                customerName(usersById.get(order.getUserId())),
+                order.getCustomerName(),
                 order.getItems().stream().mapToInt(OrderItem::getQuantity).sum(),
                 order.getTotal(),
                 order.getCreatedAt()));
     }
 
     public OrderResponse adminFindById(UUID id) {
-        Order order = getOrThrow(id);
-        User user = userRepository.findById(order.getUserId()).orElse(null);
-        return toResponse(order, user);
+        return toResponse(getOrThrow(id));
     }
 
     @Transactional
     public OrderResponse adminUpdate(UUID id, AdminOrderUpdateRequest request) {
         Order order = getOrThrow(id);
+        boolean justConfirmed = request.status() == OrderStatus.CONFIRMED && order.getStatus() != OrderStatus.CONFIRMED;
 
         if (request.status() != null) {
             order.setStatus(request.status());
@@ -102,8 +142,12 @@ public class OrderService {
         }
 
         Order saved = orderRepository.save(order);
-        User user = userRepository.findById(saved.getUserId()).orElse(null);
-        return toResponse(saved, user);
+
+        if (justConfirmed) {
+            emailService.sendPaymentConfirmedToCustomer(saved);
+        }
+
+        return toResponse(saved);
     }
 
     private Order getOrThrow(UUID id) {
@@ -111,17 +155,7 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado"));
     }
 
-    private Map<UUID, User> loadUsers(List<Order> orders) {
-        List<UUID> userIds = orders.stream().map(Order::getUserId).distinct().toList();
-        return userRepository.findAllById(userIds).stream()
-                .collect(Collectors.toMap(User::getId, Function.identity()));
-    }
-
-    private String customerName(User user) {
-        return user != null ? user.getName() : "Usuario eliminado";
-    }
-
-    private OrderResponse toResponse(Order order, User user) {
+    private OrderResponse toResponse(Order order) {
         List<OrderItemResponse> items = order.getItems().stream()
                 .map(item -> new OrderItemResponse(
                         item.getProductId(),
@@ -134,9 +168,17 @@ public class OrderService {
 
         return new OrderResponse(
                 order.getId(),
+                order.getOrderNumber(),
                 order.getStatus(),
-                customerName(user),
-                user != null ? user.getEmail() : null,
+                order.getCustomerName(),
+                order.getCustomerPhone(),
+                order.getCustomerEmail(),
+                order.getProvince(),
+                order.getCanton(),
+                order.getDistrict(),
+                order.getDeliveryMethod(),
+                order.getPaymentMethod(),
+                order.getPaymentProofUrl(),
                 order.getShippingAddress(),
                 order.getCustomerNote(),
                 items,

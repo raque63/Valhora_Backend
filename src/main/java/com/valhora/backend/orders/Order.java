@@ -37,12 +37,44 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "order_number", nullable = false, unique = true)
+    private Long orderNumber;
+
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
+
+    @Column(name = "customer_name", nullable = false)
+    private String customerName;
+
+    @Column(name = "customer_phone", nullable = false)
+    private String customerPhone;
+
+    @Column(name = "customer_email", nullable = false)
+    private String customerEmail;
+
+    @Column(nullable = false)
+    private String province;
+
+    @Column(nullable = false)
+    private String canton;
+
+    @Column(nullable = false)
+    private String district;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "delivery_method", nullable = false)
+    private DeliveryMethod deliveryMethod;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", nullable = false)
+    private PaymentMethod paymentMethod;
+
+    @Column(name = "payment_proof_url")
+    private String paymentProofUrl;
 
     @Column(name = "shipping_address", columnDefinition = "text")
     private String shippingAddress;

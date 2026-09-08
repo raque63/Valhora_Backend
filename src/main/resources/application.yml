@@ -12,6 +12,21 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_APP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 server:
   address: 0.0.0.0
@@ -39,6 +54,9 @@ app:
     create-admin: true
     admin-email: ${SEED_ADMIN_EMAIL:admin@valhora.com}
     admin-password: ${SEED_ADMIN_PASSWORD:AdminValhora123}
+  notifications:
+    admin-email: ${ADMIN_NOTIFICATION_EMAIL:valhoracr@gmail.com}
+  frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:}
