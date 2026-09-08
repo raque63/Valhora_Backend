@@ -32,7 +32,7 @@ public class CloudinaryService {
         try {
             Map<?, ?> result = cloudinary.uploader().upload(
                     file.getBytes(),
-                    ObjectUtils.asMap("folder", folder));
+                    ObjectUtils.asMap("folder", folder, "resource_type", "auto"));
             return (String) result.get("secure_url");
         } catch (IOException | RuntimeException e) {
             throw new ImageUploadException("No se pudo subir la imagen a Cloudinary", e);
