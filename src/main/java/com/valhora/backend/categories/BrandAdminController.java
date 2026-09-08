@@ -3,6 +3,7 @@ package com.valhora.backend.categories;
 import com.valhora.backend.categories.dto.BrandRequest;
 import com.valhora.backend.categories.dto.BrandResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -47,5 +48,20 @@ public class BrandAdminController {
     @PostMapping(path = "/{id}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BrandResponse uploadLogo(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
         return brandService.uploadLogo(id, file);
+    }
+
+    @PostMapping(path = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public BrandResponse addImage(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+        return brandService.addImage(id, file);
+    }
+
+    @DeleteMapping("/{id}/images")
+    public BrandResponse removeImage(@PathVariable UUID id, @RequestParam String url) {
+        return brandService.removeImage(id, url);
+    }
+
+    @PutMapping("/{id}/images/order")
+    public BrandResponse reorderImages(@PathVariable UUID id, @RequestBody List<String> imageUrls) {
+        return brandService.reorderImages(id, imageUrls);
     }
 }
