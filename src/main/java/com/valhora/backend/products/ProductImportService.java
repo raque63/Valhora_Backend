@@ -62,7 +62,6 @@ public class ProductImportService {
 
     private static final Map<String, Availability> AVAILABILITY_ALIASES = Map.of(
             "INMEDIATA", Availability.IMMEDIATE,
-            "EN_CAMINO", Availability.IN_TRANSIT,
             "POR_ENCARGO", Availability.BY_ORDER);
 
     private final ProductService productService;
@@ -170,7 +169,7 @@ public class ProductImportService {
             {"movimiento",
                 "QUARTZ, AUTOMATIC, MECHANICAL, ECO_DRIVE, DIGITAL, QUARTZ_DIGITAL "
                         + "(también: CUARZO, AUTOMATICO, MECANICO, ECO-DRIVE, ECO DRIVE, CUARZO Y DIGITAL)"},
-            {"disponibilidad", "IMMEDIATE, IN_TRANSIT, BY_ORDER (también: INMEDIATA, EN_CAMINO, POR_ENCARGO)"},
+            {"disponibilidad", "IMMEDIATE, BY_ORDER (también: INMEDIATA, POR_ENCARGO)"},
             {"nuevo / mas_vendido", "TRUE, FALSE (también: SI, NO, 1, 0). Si se deja vacío, se toma como FALSE"},
         };
 

@@ -111,7 +111,7 @@ public class DataSeeder {
                         Availability.IMMEDIATE, true, false),
                 new SeedProduct("Kronoss Chrono Sport", "KRO-CHR-002", new BigDecimal("650.00"),
                         Gender.MEN, Movement.QUARTZ, "Titanio", "Caucho", "Negro",
-                        Availability.IN_TRANSIT, false, true),
+                        Availability.BY_ORDER, false, true),
                 new SeedProduct("Meridian Rose Classic", "MER-CLA-003", new BigDecimal("540.00"),
                         Gender.WOMEN, Movement.QUARTZ, "Acero inoxidable", "Cuero", "Rosa",
                         Availability.IMMEDIATE, true, false),
